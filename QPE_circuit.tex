@@ -1,0 +1,168 @@
+\documentclass{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{QPE Circuit}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{mathtools}
+\usepackage{bbold} % allow an identity elem 1
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{changepage}
+\usepackage{lipsum}
+\usepackage{scrextend} % for block indents (for example)
+\usepackage{color, colortbl} % For Coloring Table Elements
+\usepackage{listings}
+\usepackage{makecell}  % allows more complex table formatting
+\usepackage{multirow}
+\usepackage{proof}     % for inference trees
+\usepackage{subcaption}
+\usepackage{enumitem}  % allows customization of enumerate
+
+\usepackage{wrapfig}   % allows wrapping text around figures
+\usepackage{sidecap}   % allows side captions on figures
+\sidecaptionvpos{figure}{t}
+\usepackage{physics}   % provides abs{} and norm{}, as well as bra{} and ket{} notations
+
+% for the makecell package:
+\renewcommand\theadalign{bc}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+
+% customizing enumeration environment
+\renewcommand{\labelenumi}{\textbf{(\arabic{enumi})}}
+\renewcommand{\labelenumii}{\textbf{(\textit{\alph{enumii}})}}
+
+\addtolength{\hoffset}{-1cm}
+\addtolength{\textwidth}{1cm}
+\graphicspath{ {IMAGES/} }
+
+\definecolor{Gray}{gray}{0.9}
+\newcolumntype{g}{>{\columncolor{Gray}}c}
+
+% for bibliography and citations
+\usepackage{biblatex}
+\addbibresource{bibliography.bib}
+
+% for script lettering, e.g.
+% for Fourier transform
+\usepackage[mathscr]{euscript}
+
+% For quantum circuit diagrams
+% \usepackage{qcircuit}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+
+\title{QPE Circuit Using \texttt{quantikz}}
+\author{Warren D. (Hoss) Craft}
+\date{Fall 2023}
+
+\begin{document}
+\maketitle
+%\tableofcontents
+
+\flushleft
+
+Two constructions of the QPE circuit using the \texttt{quantikz} package. The first and more detailed one we used in the Prove-It-related paper accepted for publication in \textit{Physical Review A} (2023). The more condensed version we used in a poster presentation for SQuInT (October 2023) in Albuquerque, NM.
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Circuit Diagram:    %
+% Full QPE Circuit    %
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure*}[htb]
+    \captionsetup{font=small}
+    \centerline{
+    \resizebox{0.9\textwidth}{!}{
+    \begin{quantikz}
+    % ROW 1
+    \lstick[wires=6]{1st Register:\\$t$ qubits} &
+    \lstick{$\ket{0}$} & \gate{H}\slice{1} &
+        \ctrl{6} & \qw & \ \ldots\ \qw & \qw & \qw\slice{2} & \gate[wires=6, nwires={4}]{\text{QFT}^{\dagger}}\slice{3} & \meter{} & \rstick[wires=6]{$\ket{2^t \tilde{\varphi}}$}\qw\\
+    % ROW 2
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \ctrl{5} & \ \ldots\ \qw & \qw & \qw & \qw & \meter{} & \qw\\
+    % ROW 3
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \ \ldots\ \qw & \qw & \qw & \qw & \meter{} & \qw\\
+    % ROW 4
+    &\vdots & \vdots &
+        \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+    % ROW 5
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \ \ldots\ \qw & \ctrl{2} & \qw & \qw & \meter{} & \qw\\
+    % ROW 6
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \ \ldots\ \qw & \qw & \ctrl{1} & \qw & \meter{} & \qw\\
+    % ROW 6
+    \lstick[wires=1]{2nd Register:\\$s$ qubits }
+    &\lstick{$\ket{u}$} & \qwbundle[alternate]{} &
+        \gate{U^{2^{t-1}}}\qwbundle[alternate]{} & \gate{U^{2^{t-2}}}\qwbundle[alternate]{} & \ \ldots\ \qwbundle[alternate]{} &
+        \gate{U^{2^{1}}}\qwbundle[alternate]{} &
+        \gate{U^{2^{0}}}\qwbundle[alternate]{} & \qwbundle[alternate]{} & \qwbundle[alternate]{} & \rstick{$\ket{u}$}\qwbundle[alternate]{}
+    \end{quantikz}
+    }
+    }
+    \caption{Quantum circuit implementing the QPE algorithm. From initial first-register state $\ket{0}_{t}$ and second-register state $\ket{u}$, we apply Hadamards to the first register lines, controlled $U^{2^j}$ to the second register, and an inverse quantum Fourier transform $\text{QFT}^{\dagger}$ to the first register, leading to first-register measurement $\ket{2^t \tilde{\varphi}}$, where $\tilde{\varphi}$ is an estimate of the phase.}
+    \label{fig:QPE_circuit}
+\end{figure*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Circuit Diagram:       %
+% Condensed QPE Circuit  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure*}
+    \captionsetup{font=small}
+    \centerline{
+    % \resizebox{0.9\textwidth}{!}
+    {
+    \begin{quantikz}[column sep=0.5cm, row sep=0.2cm]
+    % ROW 1
+    \lstick[wires=4]{1st Register:\\$t$ qubits} &
+    \lstick{$\ket{0}$} & \gate{H}\slice{1} &
+        \ctrl{4} & \qw & \ \ldots\ \qw & \qw\slice{2} & \gate[wires=4, nwires={3}]{\text{QFT}^{\dagger}}\slice{3} & \meter{} & \rstick[wires=4]{$\ket{2^t \tilde{\varphi}}$}\qw\\
+    % ROW 2
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \ctrl{3} & \ \ldots\ \qw & \qw & \qw & \meter{} & \qw\\
+    % ROW 3
+    % &\lstick{$\ket{0}$} & \gate{H} &
+    %     \qw & \qw & \ \ldots\ \qw & \qw & \qw & \qw & \meter{} & \qw\\
+    % ROW 4
+    &\vdots & \vdots &
+        \vdots & \vdots & \ddots & \vdots & \vdots & \vdots\\
+    % ROW 5
+    % &\lstick{$\ket{0}$} & \gate{H} &
+    %     \qw & \qw & \ \ldots\ \qw & \ctrl{2} & \qw & \qw & \meter{} & \qw\\
+    % ROW 6
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \ \ldots\ \qw & \ctrl{1} & \qw & \meter{} & \qw\\
+    % ROW 6
+    \lstick[wires=1]{2nd Register:\\$s$ qubits }
+    &\lstick{$\ket{u}$} & \qwbundle[alternate]{} &
+        \gate{U^{2^{t-1}}}\qwbundle[alternate]{} & \gate{U^{2^{t-2}}}\qwbundle[alternate]{} & \ \ldots\ \qwbundle[alternate]{} &
+        \gate{U^{2^{0}}}\qwbundle[alternate]{} & \qwbundle[alternate]{} & \qwbundle[alternate]{} & \rstick{$\ket{u}$}\qwbundle[alternate]{}
+    \end{quantikz}
+    }
+    }
+    \caption{A slightly condensed version of the circuit from Fig. \ref{fig:QPE_circuit} implementing the QPE algorithm. From initial first-register state $\ket{0}_{t}$ and second-register state $\ket{u}$, we apply Hadamards to the first register lines, controlled $U^{2^j}$ to the second register, and an inverse quantum Fourier transform $\text{QFT}^{\dagger}$ to the first register, leading to first-register measurement $\ket{2^t \tilde{\varphi}}$, where $\tilde{\varphi}$ is an estimate of the phase.}
+    \label{fig:QPE_circuit_condensed}
+\end{figure*}
+
+
+
+% \clearpage
+% ========== %
+% END MATTER %
+% ========== %
+% \newpage
+\printbibliography
+
+\end{document}
